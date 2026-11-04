@@ -1,0 +1,24 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { validateEnv } from './config/env.schema.js';
+import { DatabaseModule } from './database/database.module.js';
+import { HealthModule } from './health/health.module.js';
+import { KafkaModule } from './kafka/kafka.module.js';
+import { RedisModule } from './redis/redis.module.js';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      // Monorepo: the single source of truth is the repo-root .env
+      envFilePath: ['.env', '../../.env'],
+      validate: validateEnv,
+    }),
+    DatabaseModule,
+    RedisModule,
+    KafkaModule,
+    HealthModule,
+  ],
+})
+export class AppModule {}

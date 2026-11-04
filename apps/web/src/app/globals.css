@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/*
+ * SokoYield "Cyber-Agronomy" design tokens.
+ * Mirrors apps/mobile/lib/core/theme so web and mobile stay visually aligned.
+ */
+:root {
+  --sy-midnight: #0a1124;      /* Dark Midnight Navy - app background */
+  --sy-midnight-2: #111a33;    /* Raised surfaces / cards */
+  --sy-line: #1f2a48;          /* Hairlines & borders */
+  --sy-gold: #f2e30b;          /* Electric Yield Gold - primary / CTA text */
+  --sy-gold-dim: #b9a92a;
+  --sy-green: #39ff88;         /* Cyber Green - verified badges, positive deltas */
+  --sy-red: #e5262b;           /* Alerts & negative deltas */
+  --sy-text: #e6ebf5;
+  --sy-muted: #8a95b0;
+}
+
+@theme inline {
+  --color-midnight: var(--sy-midnight);
+  --color-midnight-2: var(--sy-midnight-2);
+  --color-line: var(--sy-line);
+  --color-gold: var(--sy-gold);
+  --color-gold-dim: var(--sy-gold-dim);
+  --color-cyber: var(--sy-green);
+  --color-alert: var(--sy-red);
+  --color-ink: var(--sy-text);
+  --color-muted: var(--sy-muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--sy-midnight);
+  color: var(--sy-text);
+}

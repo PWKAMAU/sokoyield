@@ -1,0 +1,81 @@
+name: CI - Web & API
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - "apps/mobile/**"
+      - ".github/workflows/ci-mobile.yml"
+      - "**/*.md"
+  pull_request:
+    paths-ignore:
+      - "apps/mobile/**"
+      - ".github/workflows/ci-mobile.yml"
+      - "**/*.md"
+
+concurrency:
+  group: ci-web-api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  api-e2e:
+    name: API e2e (Postgres + Redis + Kafka)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality
+    env:
+      NODE_ENV: test
+      COMPOSE_FILE: infra/docker/docker-compose.yml
+      # Defaults from docker-compose.yml; sokoyield_test is created by postgres/init
+      DATABASE_URL: postgresql://sokoyield:sokoyield_dev_password@localhost:5432/sokoyield_test
+      REDIS_URL: redis://:sokoyield_dev_redis@localhost:6379
+      KAFKA_BROKERS: localhost:9092
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same compose file as local dev, so CI exercises the real infrastructure definition
+      - name: Start infrastructure
+        run: |
+          docker compose up -d --wait postgres redis kafka
+          docker compose run --rm kafka-init
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sokoyield/api test:e2e
+
+      - name: Infrastructure logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop infrastructure
+        if: always()
+        run: docker compose down -v

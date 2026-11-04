@@ -1,0 +1,22 @@
+{
+  "name": "sokoyield",
+  "private": true,
+  "description": "SokoYield - offline-first agricultural fintech marketplace (monorepo)",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": "^22.12.0 || ^24.11.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "infra:up": "docker compose -f infra/docker/docker-compose.yml --env-file .env up -d",
+    "infra:down": "docker compose -f infra/docker/docker-compose.yml --env-file .env down",
+    "infra:logs": "docker compose -f infra/docker/docker-compose.yml --env-file .env logs -f"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}

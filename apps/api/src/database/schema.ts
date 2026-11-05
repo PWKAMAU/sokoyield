@@ -193,6 +193,29 @@ export const userSubscriptions = pgTable('user_subscriptions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+/**
+ * Dispute Resolution Vault for Admin Control Room.
+ * Compares original AI-graded harvest scan side-by-side with buyer complaint logs/evidence.
+ */
+export const cropDisputes = pgTable('crop_disputes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  cropAssetId: uuid('crop_asset_id')
+    .notNull()
+    .references(() => cropAssets.id, { onDelete: 'cascade' }),
+  buyerId: uuid('buyer_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'restrict' }),
+  farmerId: uuid('farmer_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'restrict' }),
+  disputeReason: text('dispute_reason').notNull(),
+  buyerComplaintPhotoUrl: text('buyer_complaint_photo_url'),
+  status: varchar('status', { length: 50 }).notNull().default('OPEN'), // OPEN, RESOLVED_FARMER_PAID, RESOLVED_BUYER_REFUNDED
+  adminRulingNotes: text('admin_ruling_notes'),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type CropAsset = typeof cropAssets.$inferSelect;
@@ -203,6 +226,8 @@ export type CommodityPrice = typeof commodityPrices.$inferSelect;
 export type NewCommodityPrice = typeof commodityPrices.$inferInsert;
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
 export type NewUserSubscription = typeof userSubscriptions.$inferInsert;
+export type CropDispute = typeof cropDisputes.$inferSelect;
+export type NewCropDispute = typeof cropDisputes.$inferInsert;
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type AiGrade = (typeof aiGradeEnum.enumValues)[number];
 export type EscrowStatus = (typeof escrowStatusEnum.enumValues)[number];

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Lock, Unlock, ShieldCheck, Wallet } from "lucide-react";
+import Link from "next/link";
+import { Lock, Unlock, ShieldCheck, Wallet, Shield } from "lucide-react";
 import { LiveTickerBanner } from "@/components/live-ticker-banner";
 import { OrderBook } from "@/components/order-book";
 import { GeospatialNakuruMap } from "@/components/geospatial-nakuru-map";
@@ -33,6 +34,15 @@ export default function Home() {
               <span className="text-[#8a95b0] hidden md:inline">Platform Escrow:</span>
               <span className="font-mono font-bold text-white">KES 4,545,500.00</span>
             </div>
+
+            {/* Admin Control Room Link */}
+            <Link
+              href="/admin"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#111a33] hover:bg-[#1f2a48] text-[#8a95b0] hover:text-white border border-[#1f2a48] transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5 text-[#e5262b]" />
+              <span>Control Room</span>
+            </Link>
 
             {/* SaaS Status Toggle */}
             <button

@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:sokoyield_mobile/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('FarmerHomeScreen Cyber-Agronomy UI smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpWidget(const SokoYieldApp());
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 1. Verify Alert Banner
+    expect(find.textContaining('Desert Locust warning in Nakuru County'), findsOneWidget);
+
+    // 2. Verify SokoYield Logo
+    expect(find.text('SokoYield'), findsOneWidget);
+
+    // 3. Verify Escrow Wallet Card
+    expect(find.text('Escrow Wallet'), findsWidgets);
+    expect(find.text('KES 45,280.00'), findsOneWidget);
+
+    // 4. Verify Market Price Ticker
+    expect(find.text('Market price ticker'), findsOneWidget);
+    expect(find.text('Maize'), findsOneWidget);
+    expect(find.text('Potatoes'), findsOneWidget);
+    expect(find.text('Beans'), findsOneWidget);
+
+    // 5. Verify Central Glowing Scanner Button
+    expect(find.text('Scan Crop'), findsOneWidget);
+    expect(find.text('AI'), findsOneWidget);
+
+    // 6. Verify Verification Status Pills
+    expect(find.textContaining('Yield Prediction:'), findsOneWidget);
+    expect(find.text('High'), findsOneWidget);
+    expect(find.textContaining('Crop Health:'), findsOneWidget);
+    expect(find.text('Checked'), findsOneWidget);
+
+    // 7. Verify Bottom Navigation items
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Marketplace'), findsOneWidget);
+    expect(find.text('Insights'), findsOneWidget);
   });
 }

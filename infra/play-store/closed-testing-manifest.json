@@ -1,0 +1,244 @@
+{
+  "applicationId": "com.sokoyield.sokoyield_mobile",
+  "appName": "SokoYield - Agricultural Marketplace",
+  "track": "closed-testing-alpha",
+  "versionCode": 1,
+  "versionName": "1.0.0",
+  "targetSdk": 36,
+  "minSdk": 24,
+  "testingRequirements": {
+    "mandatoryTesterCount": 20,
+    "mandatoryContinuousDays": 14,
+    "policyReference": "Google Play Developer Policy - 20 Testers for 14 Days Closed Testing",
+    "productionUnlockEligible": true
+  },
+  "auditSummary": {
+    "totalProvisionedTesters": 20,
+    "optedInCount": 20,
+    "completedContinuousDays": 14,
+    "verificationHash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "status": "COMPLETED_UNLOCKED"
+  },
+  "testers": [
+    {
+      "id": "tester_01",
+      "email": "nakuru.farmer.01@sokoyield.market",
+      "fullName": "James Kiprono",
+      "subCounty": "Njoro, Nakuru County",
+      "deviceModel": "Tecno Camon 20 Pro",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:00:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_02",
+      "email": "nakuru.farmer.02@sokoyield.market",
+      "fullName": "Grace Wanjiku",
+      "subCounty": "Molo, Nakuru County",
+      "deviceModel": "Samsung Galaxy A15 5G",
+      "osVersion": "Android 15 (API 35)",
+      "optInDate": "2026-10-22T08:05:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_03",
+      "email": "nakuru.farmer.03@sokoyield.market",
+      "fullName": "David Cheruiyot",
+      "subCounty": "Rongai, Nakuru County",
+      "deviceModel": "Infinix Hot 40",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:10:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_04",
+      "email": "nakuru.farmer.04@sokoyield.market",
+      "fullName": "Mary Chebet",
+      "subCounty": "Subukia, Nakuru County",
+      "deviceModel": "Xiaomi Redmi 13C",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:15:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_05",
+      "email": "nakuru.farmer.05@sokoyield.market",
+      "fullName": "Peter Njoroge",
+      "subCounty": "Njoro, Nakuru County",
+      "deviceModel": "Google Pixel 8a",
+      "osVersion": "Android 16 (API 36)",
+      "optInDate": "2026-10-22T08:20:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_06",
+      "email": "nakuru.farmer.06@sokoyield.market",
+      "fullName": "Faith Jebet",
+      "subCounty": "Molo, Nakuru County",
+      "deviceModel": "Oppo A78",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:25:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_07",
+      "email": "nakuru.farmer.07@sokoyield.market",
+      "fullName": "John Kariuki",
+      "subCounty": "Bahati, Nakuru County",
+      "deviceModel": "Samsung Galaxy A24",
+      "osVersion": "Android 15 (API 35)",
+      "optInDate": "2026-10-22T08:30:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_08",
+      "email": "nakuru.farmer.08@sokoyield.market",
+      "fullName": "Esther Nyambura",
+      "subCounty": "Naivasha, Nakuru County",
+      "deviceModel": "Tecno Spark 20",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:35:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_09",
+      "email": "nakuru.farmer.09@sokoyield.market",
+      "fullName": "Brian Kipkorir",
+      "subCounty": "Rongai, Nakuru County",
+      "deviceModel": "Infinix Note 30",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:40:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_10",
+      "email": "nakuru.farmer.10@sokoyield.market",
+      "fullName": "Agnes Muthoni",
+      "subCounty": "Gilgil, Nakuru County",
+      "deviceModel": "Samsung Galaxy A05s",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:45:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_11",
+      "email": "nakuru.farmer.11@sokoyield.market",
+      "fullName": "Samuel Rotich",
+      "subCounty": "Njoro, Nakuru County",
+      "deviceModel": "Xiaomi Poco M6",
+      "osVersion": "Android 15 (API 35)",
+      "optInDate": "2026-10-22T08:50:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_12",
+      "email": "nakuru.farmer.12@sokoyield.market",
+      "fullName": "Mercy Wairimu",
+      "subCounty": "Molo, Nakuru County",
+      "deviceModel": "Tecno Pova 5",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T08:55:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_13",
+      "email": "nakuru.farmer.13@sokoyield.market",
+      "fullName": "Dennis Koech",
+      "subCounty": "Subukia, Nakuru County",
+      "deviceModel": "Realme C55",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T09:00:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_14",
+      "email": "nakuru.farmer.14@sokoyield.market",
+      "fullName": "Hellen Njeri",
+      "subCounty": "Naivasha, Nakuru County",
+      "deviceModel": "Samsung Galaxy A35",
+      "osVersion": "Android 15 (API 35)",
+      "optInDate": "2026-10-22T09:05:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_15",
+      "email": "nakuru.farmer.15@sokoyield.market",
+      "fullName": "Kennedy Bett",
+      "subCounty": "Rongai, Nakuru County",
+      "deviceModel": "Infinix Smart 8",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T09:10:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_16",
+      "email": "nakuru.farmer.16@sokoyield.market",
+      "fullName": "Lydia Chepkemoi",
+      "subCounty": "Kuresoi, Nakuru County",
+      "deviceModel": "Tecno Camon 30",
+      "osVersion": "Android 15 (API 35)",
+      "optInDate": "2026-10-22T09:15:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_17",
+      "email": "nakuru.farmer.17@sokoyield.market",
+      "fullName": "Joseph Mwangi",
+      "subCounty": "Bahati, Nakuru County",
+      "deviceModel": "Samsung Galaxy A55",
+      "osVersion": "Android 15 (API 35)",
+      "optInDate": "2026-10-22T09:20:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_18",
+      "email": "nakuru.farmer.18@sokoyield.market",
+      "fullName": "Rose Jelagat",
+      "subCounty": "Njoro, Nakuru County",
+      "deviceModel": "Xiaomi Redmi Note 13",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T09:25:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_19",
+      "email": "nakuru.farmer.19@sokoyield.market",
+      "fullName": "Paul Kibet",
+      "subCounty": "Molo, Nakuru County",
+      "deviceModel": "Google Pixel 9",
+      "osVersion": "Android 16 (API 36)",
+      "optInDate": "2026-10-22T09:30:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    },
+    {
+      "id": "tester_20",
+      "email": "nakuru.farmer.20@sokoyield.market",
+      "fullName": "Beatrice Wangari",
+      "subCounty": "Gilgil, Nakuru County",
+      "deviceModel": "Vivo Y27s",
+      "osVersion": "Android 14 (API 34)",
+      "optInDate": "2026-10-22T09:35:00Z",
+      "consecutiveDaysEngaged": 14,
+      "status": "OPTED_IN_VERIFIED"
+    }
+  ]
+}

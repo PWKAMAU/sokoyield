@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import '../../data/local/isar_service.dart';
 import '../../data/models/queued_scan.dart';
+import 'play_integrity_service.dart';
 
 class SyncState {
   final bool isOnline;
@@ -47,6 +48,7 @@ class SyncService {
   final Connectivity _connectivity;
   final http.Client _client;
   final String _apiBaseUrl;
+  final PlayIntegrityService _playIntegrity;
 
   final _stateController = StreamController<SyncState>.broadcast();
   Stream<SyncState> get stateStream => _stateController.stream;
@@ -69,9 +71,11 @@ class SyncService {
     Connectivity? connectivity,
     http.Client? client,
     String? apiBaseUrl,
+    PlayIntegrityService? playIntegrity,
   })  : _isarService = isarService ?? IsarService(),
         _connectivity = connectivity ?? Connectivity(),
         _client = client ?? http.Client(),
+        _playIntegrity = playIntegrity ?? PlayIntegrityService(),
         _apiBaseUrl = apiBaseUrl ??
             (Platform.isAndroid ? 'http://10.0.2.2:4000/api/v1' : 'http://localhost:4000/api/v1') {
     _init();
@@ -201,18 +205,24 @@ class SyncService {
         final data = jsonDecode(response.body);
         scan.serverCropId = data['id'];
 
-        // Phase 4: Route image to Kindwise AI photo processing endpoint
+        // Phase 4 & 7: Route image to Kindwise AI photo processing endpoint with Play Integrity token
         final file = File(scan.localImagePath);
         if (await file.exists()) {
           final bytes = await file.readAsBytes();
           final photoUri = Uri.parse('$_apiBaseUrl/crops/${scan.serverCropId}/photo');
+          final verdict = await _playIntegrity.requestIntegrityToken(scan.scanId);
+
           await _client.post(
             photoUri,
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'x-play-integrity-token': verdict.integrityToken,
+            },
             body: jsonEncode({
               'photoBase64': base64Encode(bytes),
               'latitude': -0.3031, // Nakuru County parameter
               'longitude': 36.08,
+              'playIntegrityToken': verdict.integrityToken,
             }),
           ).timeout(const Duration(seconds: 4)).catchError((_) => http.Response('{}', 200));
         }

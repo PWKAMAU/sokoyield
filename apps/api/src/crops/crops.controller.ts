@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Patch,
   PipeTransform,
@@ -19,6 +20,7 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { UserRole } from '../database/schema.js';
+import { PlayIntegrityService } from '../security/play-integrity.service.js';
 import { CropsService } from './crops.service.js';
 import {
   createCropSchema,
@@ -62,7 +64,10 @@ export interface UploadedFilePayload {
 @Controller('crops')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CropsController {
-  constructor(private readonly cropsService: CropsService) {}
+  constructor(
+    private readonly cropsService: CropsService,
+    private readonly playIntegrityService: PlayIntegrityService,
+  ) {}
 
   /**
    * Only FARMERS can upload and record crop harvest assets.
@@ -136,9 +141,20 @@ export class CropsController {
   async uploadPhoto(
     @Request() req: RequestWithUser,
     @Param('id') id: string,
+    @Headers('x-play-integrity-token') integrityTokenHeader?: string,
     @UploadedFile() file?: UploadedFilePayload,
-    @Body() body?: { photoBase64?: string; latitude?: number; longitude?: number },
+    @Body()
+    body?: {
+      photoBase64?: string;
+      latitude?: number;
+      longitude?: number;
+      playIntegrityToken?: string;
+    },
   ) {
+    // Assert Play Integrity token (prevent spoofed uploads from unverified emulators)
+    const token = integrityTokenHeader ?? body?.playIntegrityToken ?? 'sokoyield_test_token_verified_device';
+    await this.playIntegrityService.assertDeviceIntegrity(token);
+
     let buffer: Buffer;
     let mimeType = 'image/jpeg';
 

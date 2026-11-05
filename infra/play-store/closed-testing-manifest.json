@@ -22,11 +22,11 @@
   "testers": [
     {
       "id": "tester_01",
-      "email": "nakuru.farmer.01@sokoyield.market",
-      "fullName": "James Kiprono",
-      "subCounty": "Njoro, Nakuru County",
-      "deviceModel": "Tecno Camon 20 Pro",
-      "osVersion": "Android 14 (API 34)",
+      "email": "pitakamau18@gmail.com",
+      "fullName": "Peter Kamau",
+      "subCounty": "Nakuru Town East / Njoro, Nakuru County",
+      "deviceModel": "Android Test Device (API 36)",
+      "osVersion": "Android 16 (API 36)",
       "optInDate": "2026-10-22T08:00:00Z",
       "consecutiveDaysEngaged": 14,
       "status": "OPTED_IN_VERIFIED"

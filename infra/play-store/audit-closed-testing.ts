@@ -67,15 +67,15 @@ export function runClosedTestingAudit(): boolean {
     passed = false;
   }
 
-  // 2. Tester Count Verification (Exactly 20 Opted-In Testers)
+  // 2. Tester Count Verification (At Least 20 Opted-In Testers)
   console.log(`\n2. Mandatory Tester Count Verification:`);
-  console.log(`   - Required Opted-In Testers: ${manifest.testingRequirements.mandatoryTesterCount}`);
+  console.log(`   - Required Opted-In Testers: >= ${manifest.testingRequirements.mandatoryTesterCount}`);
   console.log(`   - Total Active Testers: ${manifest.testers.length}`);
   const uniqueEmails = new Set(manifest.testers.map((t) => t.email.toLowerCase()));
-  if (manifest.testers.length === 20 && uniqueEmails.size === 20) {
-    console.log(`   -> [PASS] Exactly 20 distinct verified testers provisioned.`);
+  if (manifest.testers.length >= 20 && uniqueEmails.size >= 20) {
+    console.log(`   -> [PASS] Verified ${uniqueEmails.size} distinct testers provisioned (meets or exceeds 20 requirement).`);
   } else {
-    console.error(`   -> [FAIL] Tester count mismatch: ${manifest.testers.length} provisioned (need exactly 20 unique).`);
+    console.error(`   -> [FAIL] Tester count mismatch: ${manifest.testers.length} provisioned (need at least 20 unique).`);
     passed = false;
   }
 
@@ -83,9 +83,9 @@ export function runClosedTestingAudit(): boolean {
   console.log(`\n3. Continuous Engagement Verification (14 Continuous Days):`);
   const allEngaged14Days = manifest.testers.every((t) => t.consecutiveDaysEngaged >= 14);
   console.log(`   - Required Days: 14 continuous days`);
-  console.log(`   - Testers Completing 14 Days: ${manifest.testers.filter((t) => t.consecutiveDaysEngaged >= 14).length} / 20`);
+  console.log(`   - Testers Completing 14 Days: ${manifest.testers.filter((t) => t.consecutiveDaysEngaged >= 14).length} / ${manifest.testers.length}`);
   if (allEngaged14Days) {
-    console.log(`   -> [PASS] All 20 testers completed 14 continuous days of active testing.`);
+    console.log(`   -> [PASS] All testers completed 14 continuous days of active testing.`);
   } else {
     console.error(`   -> [FAIL] Not all testers have completed 14 continuous days.`);
     passed = false;

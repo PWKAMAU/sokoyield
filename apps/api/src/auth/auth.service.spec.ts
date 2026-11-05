@@ -20,6 +20,8 @@ describe('AuthService', () => {
       insert: vi.fn().mockReturnThis(),
       values: vi.fn().mockReturnThis(),
       returning: vi.fn(),
+      update: vi.fn().mockReturnThis(),
+      set: vi.fn().mockReturnThis(),
     };
 
     mockJwt = {
@@ -159,6 +161,39 @@ describe('AuthService', () => {
           password: 'password',
         }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('seedSuperAdmin', () => {
+    it('creates superadmin pitakamau18@gmail.com with ADMIN role when not existing', async () => {
+      mockDb.limit.mockResolvedValueOnce([]);
+
+      await service.seedSuperAdmin();
+
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'pitakamau18@gmail.com',
+          role: 'ADMIN',
+          fullName: 'Peter Kamau (Superadmin)',
+        }),
+      );
+    });
+
+    it('updates existing superadmin pitakamau18@gmail.com with ADMIN role', async () => {
+      mockDb.limit.mockResolvedValueOnce([
+        { id: 'admin-uuid', email: 'pitakamau18@gmail.com', role: 'FARMER' },
+      ]);
+
+      await service.seedSuperAdmin();
+
+      expect(mockDb.update).toHaveBeenCalled();
+      expect(mockDb.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          role: 'ADMIN',
+          fullName: 'Peter Kamau (Superadmin)',
+        }),
+      );
     });
   });
 });

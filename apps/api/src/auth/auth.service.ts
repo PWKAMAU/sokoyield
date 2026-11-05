@@ -3,6 +3,8 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -14,11 +16,57 @@ import type { AuthResponseDto, LoginDto, RegisterDto } from './dto/auth.dto.js';
 import type { JwtPayload } from './jwt.strategy.js';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: DrizzleDb,
     private readonly jwtService: JwtService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.seedSuperAdmin();
+    } catch (err) {
+      this.logger.warn(`Superadmin provisioning deferred: ${(err as Error).message}`);
+    }
+  }
+
+  async seedSuperAdmin(): Promise<void> {
+    const adminEmail = 'pitakamau18@gmail.com';
+    const rawPassword = 'Approx@22';
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(rawPassword, salt);
+
+    const existing = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.email, adminEmail))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await this.db
+        .update(users)
+        .set({
+          role: 'ADMIN',
+          passwordHash,
+          fullName: 'Peter Kamau (Superadmin)',
+          updatedAt: new Date(),
+        })
+        .where(eq(users.email, adminEmail));
+      this.logger.log(`Superadmin synced: ${adminEmail} (role: ADMIN)`);
+    } else {
+      await this.db.insert(users).values({
+        role: 'ADMIN',
+        email: adminEmail,
+        phone: '+254119348818',
+        passwordHash,
+        fullName: 'Peter Kamau (Superadmin)',
+        county: 'Nakuru County',
+      });
+      this.logger.log(`Superadmin created: ${adminEmail} (role: ADMIN)`);
+    }
+  }
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
     if (dto.role === 'FARMER' && !dto.phone) {

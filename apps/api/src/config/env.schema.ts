@@ -33,6 +33,12 @@ export const envSchema = z.object({
 
   // Storage for uploaded crop photos
   STORAGE_UPLOAD_DIR: z.string().default('./uploads'),
+
+  // Phase 5: Fintech, Stripe Connect (Escrow Holds) & Stripe Billing ($500/mo SaaS)
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_SAAS_PRICE_ID: z.string().default('price_buyer_saas_pro_500'),
+  STRIPE_CONNECT_PLATFORM_ACCOUNT_ID: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

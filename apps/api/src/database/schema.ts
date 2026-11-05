@@ -1,4 +1,5 @@
 import {
+  integer,
   jsonb,
   numeric,
   pgEnum,
@@ -160,12 +161,48 @@ export const escrowTransactionsRelations = relations(escrowTransactions, ({ one 
   }),
 }));
 
+/**
+ * TimescaleDB Time-Series Ticker table for live commodity price fluctuations.
+ * Stores hyper-frequency pricing, percentage shifts, volumes, and market hubs (e.g. Nakuru Central Market).
+ */
+export const commodityPrices = pgTable('commodity_prices', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  time: timestamp('time', { withTimezone: true }).defaultNow().notNull(),
+  commodity: varchar('commodity', { length: 50 }).notNull(), // Maize, Potatoes, Beans
+  priceKes: numeric('price_kes', { precision: 10, scale: 2 }).notNull(),
+  changePct: numeric('change_pct', { precision: 5, scale: 2 }).notNull(),
+  volumeBags: integer('volume_bags').notNull().default(0),
+  marketLocation: varchar('market_location', { length: 100 }).notNull().default('Nakuru Central Market'),
+});
+
+/**
+ * Stripe Billing subscriptions for Buyer SaaS Terminal ($500/month paywall).
+ */
+export const userSubscriptions = pgTable('user_subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
+  stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
+  status: varchar('status', { length: 50 }).notNull().default('INACTIVE'), // ACTIVE, INACTIVE, TRIALING
+  planName: varchar('plan_name', { length: 100 }).notNull().default('BUYER_SAAS_PRO_500'),
+  monthlyAmountUsd: numeric('monthly_amount_usd', { precision: 10, scale: 2 }).notNull().default('500.00'),
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type CropAsset = typeof cropAssets.$inferSelect;
 export type NewCropAsset = typeof cropAssets.$inferInsert;
 export type EscrowTransaction = typeof escrowTransactions.$inferSelect;
 export type NewEscrowTransaction = typeof escrowTransactions.$inferInsert;
+export type CommodityPrice = typeof commodityPrices.$inferSelect;
+export type NewCommodityPrice = typeof commodityPrices.$inferInsert;
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+export type NewUserSubscription = typeof userSubscriptions.$inferInsert;
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type AiGrade = (typeof aiGradeEnum.enumValues)[number];
 export type EscrowStatus = (typeof escrowStatusEnum.enumValues)[number];

@@ -7,10 +7,12 @@ import { AuthModule } from './auth/auth.module.js';
 import { validateEnv } from './config/env.schema.js';
 import { CropsModule } from './crops/crops.module.js';
 import { DatabaseModule } from './database/database.module.js';
+import { FintechModule } from './fintech/fintech.module.js';
 import { HealthModule } from './health/health.module.js';
 import { KafkaModule } from './kafka/kafka.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { RedisModule } from './redis/redis.module.js';
+import { TickerModule } from './ticker/ticker.module.js';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { RedisModule } from './redis/redis.module.js';
     AlertsModule,
     AuthModule,
     CropsModule,
+    TickerModule,
+    FintechModule,
     HealthModule,
   ],
 })

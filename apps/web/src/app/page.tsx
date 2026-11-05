@@ -35,6 +35,14 @@ export default function Home() {
               <span className="font-mono font-bold text-white">KES 4,545,500.00</span>
             </div>
 
+            {/* Farmer Mobile App Download Link */}
+            <Link
+              href="/download"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#111a33] hover:bg-[#1f2a48] text-[#39ff88] border border-[#39ff88]/30 transition-colors"
+            >
+              <span>Download App</span>
+            </Link>
+
             {/* Admin Control Room Link */}
             <Link
               href="/admin"

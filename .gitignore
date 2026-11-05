@@ -37,3 +37,7 @@ Thumbs.db
 
 # Docker volumes (local)
 infra/docker/data/
+
+# Uploads storage (local)
+uploads/
+**/uploads/

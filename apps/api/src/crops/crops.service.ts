@@ -1,10 +1,15 @@
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import {
   ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { desc, eq } from 'drizzle-orm';
+import { AiService } from '../ai/ai.service.js';
+import type { Env } from '../config/env.schema.js';
 import { DRIZZLE_DB, type DrizzleDb } from '../database/database.module.js';
 import {
   cropAssets,
@@ -14,6 +19,7 @@ import {
   type EscrowStatus,
   type UserRole,
 } from '../database/schema.js';
+import { KafkaService } from '../kafka/kafka.module.js';
 import type {
   CreateCropDto,
   UpdateAiGradeDto,
@@ -22,7 +28,12 @@ import type {
 
 @Injectable()
 export class CropsService {
-  constructor(@Inject(DRIZZLE_DB) private readonly db: DrizzleDb) {}
+  constructor(
+    @Inject(DRIZZLE_DB) private readonly db: DrizzleDb,
+    private readonly kafka: KafkaService,
+    private readonly aiService: AiService,
+    private readonly config: ConfigService<Env, true>,
+  ) {}
 
   /**
    * Records a harvested crop asset with GPS Polygon, AI Grade, Timestamp, and Escrow Status.
@@ -167,5 +178,81 @@ export class CropsService {
     }
 
     return updatedCrop;
+  }
+
+  /**
+   * Uploads an offline-queued photo, saves it to disk/storage,
+   * emits a Kafka event to `crop.photo.uploaded`, and triggers Kindwise AI grading.
+   */
+  async uploadCropPhoto(
+    id: string,
+    imageBuffer: Buffer,
+    mimeType: string,
+    user: { id: string; role: UserRole },
+    options?: { latitude?: number; longitude?: number },
+  ): Promise<{ crop: CropAsset; status: string; message: string }> {
+    const crop = await this.db.query.cropAssets.findFirst({
+      where: eq(cropAssets.id, id),
+    });
+
+    if (!crop) {
+      throw new NotFoundException(`Crop asset with ID "${id}" not found`);
+    }
+
+    // Role-based authorization: Only the owning farmer or admin can upload photos
+    if (user.role === 'FARMER' && crop.farmerId !== user.id) {
+      throw new ForbiddenException('You can only upload photos for your own crops');
+    }
+
+    // Save image to storage directory
+    const uploadDir = this.config.get('STORAGE_UPLOAD_DIR', { infer: true });
+    const cropsDir = path.join(uploadDir, 'crops');
+    await fs.mkdir(cropsDir, { recursive: true });
+
+    const filename = `${crop.id}-${Date.now()}.jpg`;
+    const filePath = path.join(cropsDir, filename);
+    await fs.writeFile(filePath, imageBuffer);
+
+    const photoUrl = `/uploads/crops/${filename}`;
+
+    // Update photo URL in database
+    await this.db
+      .update(cropAssets)
+      .set({
+        photoUrl,
+        updatedAt: new Date(),
+      })
+      .where(eq(cropAssets.id, id));
+
+    // Emit asynchronous Kafka event for AI grading pipeline
+    await this.kafka.emitCropPhotoUploaded({
+      cropId: crop.id,
+      farmerId: crop.farmerId,
+      cropName: crop.cropName,
+      photoUrl,
+      filePath,
+      timestamp: new Date().toISOString(),
+      latitude: options?.latitude,
+      longitude: options?.longitude,
+    });
+
+    // Directly process AI grading via Kindwise provider
+    const { crop: gradedCrop } = await this.aiService.processCropGrading(
+      crop.id,
+      imageBuffer,
+      mimeType,
+      {
+        cropName: crop.cropName,
+        latitude: options?.latitude,
+        longitude: options?.longitude,
+        photoUrl,
+      },
+    );
+
+    return {
+      crop: gradedCrop,
+      status: 'GRADED',
+      message: `Crop photo processed and graded as ${gradedCrop.aiGrade} via Kindwise AI.`,
+    };
   }
 }

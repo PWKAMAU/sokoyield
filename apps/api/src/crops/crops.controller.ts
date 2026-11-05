@@ -8,9 +8,12 @@ import {
   PipeTransform,
   Post,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { type ZodSchema } from 'zod';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -45,6 +48,15 @@ interface RequestWithUser {
     role: UserRole;
     fullName: string;
   };
+}
+
+export interface UploadedFilePayload {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
 }
 
 @Controller('crops')
@@ -112,5 +124,42 @@ export class CropsController {
     @Body() dto: UpdateAiGradeDto,
   ) {
     return this.cropsService.updateAiGrade(id, dto);
+  }
+
+  /**
+   * Uploads crop photo for AI grading via Kindwise.
+   * Supports multipart/form-data upload or JSON base64.
+   */
+  @Post(':id/photo')
+  @Roles('FARMER', 'ADMIN')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPhoto(
+    @Request() req: RequestWithUser,
+    @Param('id') id: string,
+    @UploadedFile() file?: UploadedFilePayload,
+    @Body() body?: { photoBase64?: string; latitude?: number; longitude?: number },
+  ) {
+    let buffer: Buffer;
+    let mimeType = 'image/jpeg';
+
+    if (file) {
+      buffer = file.buffer;
+      mimeType = file.mimetype;
+    } else if (body?.photoBase64) {
+      const match = body.photoBase64.match(/^data:([^;]+);base64,(.+)$/);
+      if (match) {
+        mimeType = match[1];
+        buffer = Buffer.from(match[2], 'base64');
+      } else {
+        buffer = Buffer.from(body.photoBase64, 'base64');
+      }
+    } else {
+      throw new BadRequestException('Must provide either a file upload or a photoBase64 string');
+    }
+
+    return this.cropsService.uploadCropPhoto(id, buffer, mimeType, req.user, {
+      latitude: body?.latitude,
+      longitude: body?.longitude,
+    });
   }
 }

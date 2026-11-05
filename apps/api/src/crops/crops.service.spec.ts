@@ -1,13 +1,19 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AiService } from '../ai/ai.service.js';
 import { DRIZZLE_DB } from '../database/database.module.js';
-import { CropsService } from './crops.service.js';
 import type { GpsPolygon } from '../database/schema.js';
+import { KafkaService } from '../kafka/kafka.module.js';
+import { CropsService } from './crops.service.js';
 
 describe('CropsService', () => {
   let service: CropsService;
   let mockDb: any;
+  let mockKafka: any;
+  let mockAiService: any;
+  let mockConfig: any;
 
   // Nakuru County sample GPS polygon for farm plot
   const nakuruPolygon: GpsPolygon = {
@@ -35,12 +41,34 @@ describe('CropsService', () => {
       returning: vi.fn(),
       update: vi.fn().mockReturnThis(),
       set: vi.fn().mockReturnThis(),
+      query: {
+        cropAssets: {
+          findFirst: vi.fn(),
+        },
+      },
+    };
+
+    mockKafka = {
+      emitCropPhotoUploaded: vi.fn().mockResolvedValue(true),
+      emitCropGradeCompleted: vi.fn().mockResolvedValue(true),
+      emitCropPhotoDlq: vi.fn().mockResolvedValue(true),
+    };
+
+    mockAiService = {
+      processCropGrading: vi.fn(),
+    };
+
+    mockConfig = {
+      get: vi.fn().mockReturnValue('./uploads'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CropsService,
         { provide: DRIZZLE_DB, useValue: mockDb },
+        { provide: KafkaService, useValue: mockKafka },
+        { provide: AiService, useValue: mockAiService },
+        { provide: ConfigService, useValue: mockConfig },
       ],
     }).compile();
 
@@ -184,6 +212,71 @@ describe('CropsService', () => {
 
       expect(result.aiGrade).toBe('GRADE_A');
       expect(result.aiConfidence).toBe('0.9850');
+    });
+  });
+
+  describe('uploadCropPhoto', () => {
+    it('saves image, updates photo URL, emits Kafka event, and invokes Kindwise AI grading', async () => {
+      const mockCrop = {
+        id: 'crop-123',
+        farmerId: 'farmer-456',
+        cropName: 'Maize',
+        aiGrade: 'PENDING_SCAN',
+        photoUrl: null,
+      };
+
+      mockDb.query.cropAssets.findFirst.mockResolvedValueOnce(mockCrop);
+      mockDb.returning.mockResolvedValueOnce([mockCrop]);
+
+      mockAiService.processCropGrading.mockResolvedValueOnce({
+        crop: {
+          ...mockCrop,
+          aiGrade: 'GRADE_A',
+          aiConfidence: '0.9650',
+          photoUrl: '/uploads/crops/crop-123.jpg',
+        },
+        diagnosis: {
+          healthy: true,
+          suggestedGrade: 'GRADE_A',
+          confidence: 0.965,
+        },
+      });
+
+      const buffer = Buffer.from('test-image-data');
+      const result = await service.uploadCropPhoto(
+        'crop-123',
+        buffer,
+        'image/jpeg',
+        { id: 'farmer-456', role: 'FARMER' },
+        { latitude: -0.3031, longitude: 36.08 },
+      );
+
+      expect(result.status).toBe('GRADED');
+      expect(result.crop.aiGrade).toBe('GRADE_A');
+      expect(mockKafka.emitCropPhotoUploaded).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cropId: 'crop-123',
+          cropName: 'Maize',
+        }),
+      );
+      expect(mockAiService.processCropGrading).toHaveBeenCalled();
+    });
+
+    it('rejects photo upload if requesting farmer does not own the crop', async () => {
+      mockDb.query.cropAssets.findFirst.mockResolvedValueOnce({
+        id: 'crop-123',
+        farmerId: 'other-farmer',
+      });
+
+      const buffer = Buffer.from('test-image-data');
+      await expect(
+        service.uploadCropPhoto(
+          'crop-123',
+          buffer,
+          'image/jpeg',
+          { id: 'farmer-456', role: 'FARMER' },
+        ),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });

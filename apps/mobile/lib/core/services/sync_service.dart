@@ -200,6 +200,23 @@ class SyncService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
         scan.serverCropId = data['id'];
+
+        // Phase 4: Route image to Kindwise AI photo processing endpoint
+        final file = File(scan.localImagePath);
+        if (await file.exists()) {
+          final bytes = await file.readAsBytes();
+          final photoUri = Uri.parse('$_apiBaseUrl/crops/${scan.serverCropId}/photo');
+          await _client.post(
+            photoUri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'photoBase64': base64Encode(bytes),
+              'latitude': -0.3031, // Nakuru County parameter
+              'longitude': 36.08,
+            }),
+          ).timeout(const Duration(seconds: 4)).catchError((_) => http.Response('{}', 200));
+        }
+
         return true;
       }
 

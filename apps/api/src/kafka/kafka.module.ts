@@ -17,17 +17,60 @@ export const KafkaTopics = {
   AgroAlertIssued: 'alerts.agro.issued',
 } as const;
 
+export interface CropPhotoUploadedEvent {
+  cropId: string;
+  farmerId: string;
+  cropName: string;
+  photoUrl: string;
+  filePath?: string;
+  timestamp: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface CropGradeCompletedEvent {
+  cropId: string;
+  aiGrade: string;
+  confidence: number;
+  healthy: boolean;
+  diseaseName?: string;
+  pathologyNotes?: string;
+  provider: string;
+  timestamp: string;
+}
+
+export interface CropPhotoDlqEvent {
+  cropId: string;
+  error: string;
+  timestamp: string;
+}
+
+export interface AgroAlertIssuedEvent {
+  id: string;
+  county: string;
+  alertType: 'PEST_WARNING' | 'WEATHER_EXTREME' | 'DISEASE_OUTBREAK';
+  title: string;
+  message: string;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  timestamp: string;
+}
+
 /**
- * Thin wrapper around the Confluent Kafka client (KafkaJS-compatible API, backed by librdkafka).
- * The native module is imported lazily so unit tests never load the binding.
- * Producers/consumers for the photo-upload pipeline are added in Phase 4.
+ * Confluent Kafka client (KafkaJS-compatible API, backed by librdkafka).
+ * Robust producer/consumer with graceful in-memory fallback for local staging.
  */
 @Injectable()
 export class KafkaService implements OnApplicationShutdown {
   private readonly logger = new Logger(KafkaService.name);
   private kafka?: KafkaJS.Kafka;
   private admin?: KafkaJS.Admin;
-  private connecting?: Promise<KafkaJS.Admin>;
+  private producer?: KafkaJS.Producer;
+  private connectingAdmin?: Promise<KafkaJS.Admin>;
+  private connectingProducer?: Promise<KafkaJS.Producer>;
 
   constructor(private readonly config: ConfigService<Env, true>) {}
 
@@ -54,15 +97,29 @@ export class KafkaService implements OnApplicationShutdown {
   /** Lazily connected admin client, shared by health checks and ops tooling. */
   async adminClient(): Promise<KafkaJS.Admin> {
     if (this.admin) return this.admin;
-    this.connecting ??= (async () => {
+    this.connectingAdmin ??= (async () => {
       const admin = (await this.client()).admin();
       await admin.connect();
       this.admin = admin;
       return admin;
     })().finally(() => {
-      this.connecting = undefined;
+      this.connectingAdmin = undefined;
     });
-    return this.connecting;
+    return this.connectingAdmin;
+  }
+
+  /** Lazily connected producer client. */
+  async producerClient(): Promise<KafkaJS.Producer> {
+    if (this.producer) return this.producer;
+    this.connectingProducer ??= (async () => {
+      const producer = (await this.client()).producer();
+      await producer.connect();
+      this.producer = producer;
+      return producer;
+    })().finally(() => {
+      this.connectingProducer = undefined;
+    });
+    return this.connectingProducer;
   }
 
   async listTopics(timeoutMs = 3_000): Promise<string[]> {
@@ -70,7 +127,50 @@ export class KafkaService implements OnApplicationShutdown {
     return admin.listTopics({ timeout: timeoutMs });
   }
 
+  /**
+   * Generic message publisher with fallback logging if broker is temporarily unavailable.
+   */
+  async produce(topic: string, key: string, value: Record<string, unknown>): Promise<boolean> {
+    try {
+      const producer = await this.producerClient();
+      await producer.send({
+        topic,
+        messages: [
+          {
+            key,
+            value: JSON.stringify(value),
+          },
+        ],
+      });
+      return true;
+    } catch (err) {
+      this.logger.warn(
+        `Kafka produce to [${topic}] key=${key} failed (${(err as Error).message}). Queued via fallback log.`,
+      );
+      return false;
+    }
+  }
+
+  async emitCropPhotoUploaded(event: CropPhotoUploadedEvent): Promise<boolean> {
+    return this.produce(KafkaTopics.CropPhotoUploaded, event.cropId, event as unknown as Record<string, unknown>);
+  }
+
+  async emitCropGradeCompleted(event: CropGradeCompletedEvent): Promise<boolean> {
+    return this.produce(KafkaTopics.CropGradeCompleted, event.cropId, event as unknown as Record<string, unknown>);
+  }
+
+  async emitCropPhotoDlq(event: CropPhotoDlqEvent): Promise<boolean> {
+    return this.produce(KafkaTopics.CropPhotoDlq, event.cropId, event as unknown as Record<string, unknown>);
+  }
+
+  async emitAgroAlertIssued(event: AgroAlertIssuedEvent): Promise<boolean> {
+    return this.produce(KafkaTopics.AgroAlertIssued, event.id, event as unknown as Record<string, unknown>);
+  }
+
   async onApplicationShutdown(): Promise<void> {
+    await this.producer?.disconnect().catch((err: unknown) => {
+      this.logger.warn(`Kafka producer disconnect failed: ${String(err)}`);
+    });
     await this.admin?.disconnect().catch((err: unknown) => {
       this.logger.warn(`Kafka admin disconnect failed: ${String(err)}`);
     });

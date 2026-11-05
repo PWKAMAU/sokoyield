@@ -14,6 +14,25 @@ export const envSchema = z.object({
   KAFKA_CLIENT_ID: z.string().min(1).default('sokoyield-api'),
   JWT_SECRET: z.string().min(8).default('sokoyield_super_secret_jwt_key_2026'),
   JWT_EXPIRES_IN: z.string().default('7d'),
+
+  // Phase 4: AI Quality Grading (Kindwise primary, Plantix adapter)
+  KINDWISE_API_KEY: z.string().optional(),
+  KINDWISE_API_URL: z.string().url().default('https://crop.kindwise.com/api/v1'),
+  PLANTIX_API_KEY: z.string().optional(),
+  PLANTIX_API_URL: z.string().url().default('https://api.plantix.net/v2'),
+
+  // Phase 4: Weather & Pest Satellite Alerts (Agrio / Open-Meteo fallback)
+  AGRIO_API_KEY: z.string().optional(),
+  AGRIO_API_URL: z.string().url().default('https://api.agrio.app/v1'),
+
+  // Phase 4: Twilio Rural Emergency SMS (Authorized test parameter: +254119348818)
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_FROM_NUMBER: z.string().optional(),
+  EMERGENCY_ALERT_RECIPIENT: z.string().default('+254119348818'),
+
+  // Storage for uploaded crop photos
+  STORAGE_UPLOAD_DIR: z.string().default('./uploads'),
 });
 
 export type Env = z.infer<typeof envSchema>;

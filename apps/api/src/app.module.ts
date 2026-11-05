@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AiModule } from './ai/ai.module.js';
+import { AlertsModule } from './alerts/alerts.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { validateEnv } from './config/env.schema.js';
 import { CropsModule } from './crops/crops.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
 import { KafkaModule } from './kafka/kafka.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 import { RedisModule } from './redis/redis.module.js';
 
 @Module({
@@ -17,9 +21,13 @@ import { RedisModule } from './redis/redis.module.js';
       envFilePath: ['.env', '../../.env'],
       validate: validateEnv,
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     RedisModule,
     KafkaModule,
+    NotificationsModule,
+    AiModule,
+    AlertsModule,
     AuthModule,
     CropsModule,
     HealthModule,

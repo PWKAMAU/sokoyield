@@ -12,6 +12,8 @@ export const envSchema = z.object({
   REDIS_URL: z.string().url(),
   KAFKA_BROKERS: z.string().min(1).default('localhost:9092'),
   KAFKA_CLIENT_ID: z.string().min(1).default('sokoyield-api'),
+  JWT_SECRET: z.string().min(8).default('sokoyield_super_secret_jwt_key_2026'),
+  JWT_EXPIRES_IN: z.string().default('7d'),
 });
 
 export type Env = z.infer<typeof envSchema>;

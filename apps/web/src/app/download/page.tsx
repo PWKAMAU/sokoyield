@@ -105,14 +105,23 @@ export default function DownloadPage() {
               </div>
             </div>
 
-            <a
-              href="/api/download"
-              download="sokoyield-v1.0.0-nakuru.apk"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-lg bg-[#39ff88] hover:bg-[#32e078] text-black font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99]"
-            >
-              <Download className="w-4 h-4 stroke-[2.5]" />
-              <span>Download Direct APK (.apk)</span>
-            </a>
+            <div className="flex flex-col gap-2">
+              <a
+                href="https://github.com/PWKAMAU/sokoyield/releases/download/v1.0.0/app-debug.apk"
+                download="sokoyield-v1.0.0-nakuru.apk"
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-lg bg-[#39ff88] hover:bg-[#32e078] text-black font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99]"
+              >
+                <Download className="w-4 h-4 stroke-[2.5]" />
+                <span>Download Direct APK (.apk)</span>
+              </a>
+              <a
+                href="https://github.com/PWKAMAU/sokoyield/releases/download/v1.0.0/app-release.aab"
+                download="sokoyield-v1.0.0-release.aab"
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-[#111a33] hover:bg-[#1f2a48] text-[#8a95b0] hover:text-white font-mono text-[11px] border border-[#1f2a48] transition-all"
+              >
+                <span>Download Android App Bundle (.aab · 51.7 MB)</span>
+              </a>
+            </div>
           </div>
 
           {/* Card 2: Google Play Closed Testing */}
